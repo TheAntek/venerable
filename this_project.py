@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter.ttk import Treeview
 import sqlite3
 
 
@@ -6,53 +7,67 @@ def sql_table(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
     Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
     # conn = sqlite3.connect('{}\{}.db'.format(curs, spec))
-    print(curs, spec, group)
-    conn = sqlite3.connect('spec123.db')
-
-    cursor = conn.execute('SELECT * FROM {}'.format(group))
-    result = cursor.fetchall()
+    conn = sqlite3.connect('spec123.db')  # конектимся к базе данных
+    cursor = conn.execute('SELECT * FROM {}'.format(group))  # делаем запрос
+    result = cursor.fetchall()  # в переменную присваиваем результата запроса
 
     print(result)
-    conn.close()
+    conn.close()  # дисконектимся от базы данных
 
     return result
 
 
-def formatting(text):
-    """ Очень красиво (нет) форматируем (пытаемся) sql вывод """
-    a = ''
-    for i in range(len(text)):
-        a += str(text[i]) + '\n'
-    return a
+def sql_columns(curs, spec, group):
+    # conn = sqlite3.connect('{}\{}.db'.format(curs, spec))
+    conn = sqlite3.connect('spec123.db')  # конектимся к базе данных
+    cursor = conn.execute('SELECT * FROM {}'.format(group))  # делаем запрос
+    columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
+
+    print(columns_names)
+    conn.close()  # дисконектимся от базы данных
+
+    return columns_names
 
 
 class View2:
-
-    def __init__(self, master, curs, spec, group):
+    """ Окно, которое открывается при нажатии на 'Вибрати' """
+    def __init__(self, master, curs, spec, group, headings, rows):
         self.master = master
         self.curs = curs
         self.spec = spec
         self.group = group
-
-        table = sql_table(curs, spec, group)  # получаем наши данные с sql таблицы
-        new_table = formatting(table)  # форматируем данные
-        formatting(table)  # в консоль вывод
+        self.headings = headings
+        self.rows = rows
         master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
+
+        self.my_table = Treeview(master, show='headings')  # создаем таблицу
+        self.fill_table()  # заполняем таблицу
+        self.my_table.grid(row=1, column=0)  # выводим таблицу
 
         self.label_info = Label(master, text='Курс: {}\nСпеціальність: {}\nГрупа: {}'.format(curs, spec, group))
         self.label_info.grid(row=0, column=0)
 
-        self.label_table = Label(master, text=new_table, font='Arial 15')
-        self.label_table.grid(row=1, column=0)
-
         self.quitButton = Button(master, text='Закрити', width='20', command=self.close_window)
         self.quitButton.grid(row=2, column=0)
 
+    def fill_table(self):
+        """ Работаем с таблицой """
+        self.my_table['columns'] = self.headings  # в 'столбцы' присваиваем переменную
+
+        for head in self.headings:
+            self.my_table.heading(head, text=head, anchor=CENTER)
+            self.my_table.column(head, anchor=CENTER, width=100)
+
+        for row in self.rows:
+            self.my_table.insert('', END, values=row)  # вставляем в каждую строку таблицы нужный кортеж значений
+
     def close_window(self):
+        """ Устрой дестрой """
         self.master.destroy()
 
 
 class View:
+    """ Главное окно """
     options_2 = ('121', '122', '123', '124', '125')  # специальности
     # все группы каждой специальности
     options_121 = (('ІП-71', 'ІП-72', 'ІП-73', 'ІП-74', 'ІП-75'), ('ІП-61', 'ІП-62', 'ІП-63', 'ІП-64', 'ІП-65'),
@@ -158,21 +173,14 @@ class View:
         self.go_button.grid(row=8, column=3)
         print('Ви вибрали: {} курс {} спеціальність {} група'.format(curs, spec, group))
 
-        # conn = sqlite3.connect('spec123.db')
-
-        # cursor1 = conn.execute('SELECT * FROM io{}'.format(number))
-        # result1 = cursor1.fetchall()
-
-        # for i in result1:
-        #    print(i)
-
-        # conn.close()
-
     def the_function(self, curs, spec, group):
-        """Функция, которая вызывается при нажатии на <ПОШУК> """
-        print('Hey, billy')
+        """Функция, которая вызывается при нажатии на <Вибрати> """
+        students = sql_table(curs, spec, group)  # students - список кортежей. ex: [('1', '2'), ('3', '4')..]
+        columns = sql_columns(curs, spec, group)  # columns - список названий столбцов
+
+        # Создаем новое окно
         self.new_window = Toplevel(self.master)
-        self.app = View2(self.new_window, curs, spec, group)
+        self.app = View2(self.new_window, curs, spec, group, columns, students)
 
 
 if __name__ == '__main__':
