@@ -5,7 +5,7 @@ import sqlite3
 
 def sql_table(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
-    Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
+    Например: Curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
     # conn = sqlite3.connect('{}\{}.db'.format(curs, spec))
     conn = sqlite3.connect('spec123.db')  # конектимся к базе данных
     cursor = conn.execute('SELECT * FROM {}'.format(group))  # делаем запрос
