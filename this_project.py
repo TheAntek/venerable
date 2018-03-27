@@ -6,9 +6,8 @@ import sqlite3
 def sql_table(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
     Например: Curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
-    # conn = sqlite3.connect('{}\{}.db'.format(curs, spec))
-    conn = sqlite3.connect('spec123.db')  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {}'.format(group))  # делаем запрос
+    conn = sqlite3.connect('Database\\Curs_{}\\spec{}.db'.format(curs, spec))  # конектимся к базе данных
+    cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
     result = cursor.fetchall()  # в переменную присваиваем результата запроса
 
     print(result)
@@ -17,10 +16,10 @@ def sql_table(curs, spec, group):
     return result
 
 
-def sql_columns(curs, spec, group):
-    # conn = sqlite3.connect('{}\{}.db'.format(curs, spec))
-    conn = sqlite3.connect('spec123.db')  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {}'.format(group))  # делаем запрос
+def sql_columns_names(curs, spec, group):
+    """Возвращает названия столбцов"""
+    conn = sqlite3.connect('Database\\Curs_{}\\spec{}.db'.format(curs, spec))  # конектимся к базе данных
+    cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос
     columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
 
     print(columns_names)
@@ -76,7 +75,7 @@ class View:
     options_122 = (('ІС-71', 'ІС-72', 'ІС-73', 'ІС-74', 'ІС-75'), ('ІС-61', 'ІС-62', 'ІС-63', 'ІС-64', 'ІС-65'),
                    ('ІС-51', 'ІС-52', 'ІС-53', 'ІС-54', 'ІС-55'), ('ІС-41', 'ІС-42', 'ІС-43', 'ІС-44', 'ІС-45'))
 
-    options_123 = (('ІО-71', 'ІО-72', 'ІО-73', 'ІО-74', 'ІО-75'), ('io61', 'io62', 'io63', 'io64', 'io65'),
+    options_123 = (('ІО-71', 'ІО-72', 'ІО-73', 'ІО-74', 'ІО-75'), ('IO-61', 'IO-62', 'IO-63', 'IO-64', 'IO-65'),
                    ('ІО-51', 'ІО-52', 'ІО-53', 'ІО-54', 'ІО-55'), ('ІО-41', 'ІО-42', 'ІО-43', 'ІО-44', 'ІО-45'))
 
     options_124 = (('ІК-71', 'ІК-72', 'ІК-73', 'ІК-74', 'ІК-75'), ('ІК-61', 'ІК-62', 'ІК-63', 'ІК-64', 'ІК-65'),
@@ -176,7 +175,7 @@ class View:
     def the_function(self, curs, spec, group):
         """Функция, которая вызывается при нажатии на <Вибрати> """
         students = sql_table(curs, spec, group)  # students - список кортежей. ex: [('1', '2'), ('3', '4')..]
-        columns = sql_columns(curs, spec, group)  # columns - список названий столбцов
+        columns = sql_columns_names(curs, spec, group)  # columns - список названий столбцов
 
         # Создаем новое окно
         self.new_window = Toplevel(self.master)
