@@ -1,12 +1,12 @@
 from tkinter import *
-from tkinter.ttk import Treeview
+from tkinter.ttk import Treeview, Style, Button as Button_ttk
 import sqlite3
 
 
 def sql_table(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
-    Например: Curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
-    conn = sqlite3.connect('Database\\Curs_{}\\spec{}.db'.format(curs, spec))  # конектимся к базе данных
+    Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
+    conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
     cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
     result = cursor.fetchall()  # в переменную присваиваем результата запроса
 
@@ -18,7 +18,7 @@ def sql_table(curs, spec, group):
 
 def sql_columns_names(curs, spec, group):
     """Возвращает названия столбцов"""
-    conn = sqlite3.connect('Database\\Curs_{}\\spec{}.db'.format(curs, spec))  # конектимся к базе данных
+    conn = sqlite3.connect('database\\Curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
     cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос
     columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
 
@@ -39,14 +39,19 @@ class View2:
         self.rows = rows
         master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
 
-        self.my_table = Treeview(master, show='headings')  # создаем таблицу
+        # style = Style()
+        # style.configure(".", font=('Helvetica', 8))
+        # style.configure("Treeview", foreground='red')
+        # style.configure("Treeview.Heading", foreground='green')
+
+        self.my_table = Treeview(master, show='headings', height=19)  # создаем таблицу
         self.fill_table()  # заполняем таблицу
         self.my_table.grid(row=1, column=0)  # выводим таблицу
 
         self.label_info = Label(master, text='Курс: {}\nСпеціальність: {}\nГрупа: {}'.format(curs, spec, group))
         self.label_info.grid(row=0, column=0)
 
-        self.quitButton = Button(master, text='Закрити', width='20', command=self.close_window)
+        self.quitButton = Button_ttk(master, text='Закрити', width='20', command=self.close_window, style='Fun.TButton')
         self.quitButton.grid(row=2, column=0)
 
     def fill_table(self):
@@ -54,8 +59,13 @@ class View2:
         self.my_table['columns'] = self.headings  # в 'столбцы' присваиваем переменную
 
         for head in self.headings:
-            self.my_table.heading(head, text=head, anchor=CENTER)
-            self.my_table.column(head, anchor=CENTER, width=100)
+            """ Создаем столбцы. Если это стоблец П.И.Б. - делаем ширину больше """
+            if head == 'full_name':
+                self.my_table.heading(head, text=head, anchor=CENTER)
+                self.my_table.column(head, anchor=CENTER, width=193)
+            else:
+                self.my_table.heading(head, text=head, anchor=CENTER)
+                self.my_table.column(head, anchor=CENTER, width=55)
 
         for row in self.rows:
             self.my_table.insert('', END, values=row)  # вставляем в каждую строку таблицы нужный кортеж значений
