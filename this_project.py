@@ -10,7 +10,7 @@ def sql_table(curs, spec, group):
     cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
     result = cursor.fetchall()  # в переменную присваиваем результата запроса
 
-    print(result)
+    # print(result)
     conn.close()  # дисконектимся от базы данных
 
     return result
@@ -22,57 +22,10 @@ def sql_columns_names(curs, spec, group):
     cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос
     columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
 
-    print(columns_names)
+    # print(columns_names)
     conn.close()  # дисконектимся от базы данных
 
     return columns_names
-
-
-class View2:
-    """ Окно, которое открывается при нажатии на 'Вибрати' """
-    def __init__(self, master, curs, spec, group, headings, rows):
-        self.master = master
-        self.curs = curs
-        self.spec = spec
-        self.group = group
-        self.headings = headings
-        self.rows = rows
-        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
-
-        # style = Style()
-        # style.configure(".", font=('Helvetica', 8))
-        # style.configure("Treeview", foreground='red')
-        # style.configure("Treeview.Heading", foreground='green')
-
-        self.my_table = Treeview(master, show='headings', height=19)  # создаем таблицу
-        self.fill_table()  # заполняем таблицу
-        self.my_table.grid(row=1, column=0)  # выводим таблицу
-
-        self.label_info = Label(master, text='Курс: {}\nСпеціальність: {}\nГрупа: {}'.format(curs, spec, group))
-        self.label_info.grid(row=0, column=0)
-
-        self.quitButton = Button_ttk(master, text='Закрити', width='20', command=self.close_window, style='Fun.TButton')
-        self.quitButton.grid(row=2, column=0)
-
-    def fill_table(self):
-        """ Работаем с таблицой """
-        self.my_table['columns'] = self.headings  # в 'столбцы' присваиваем переменную
-
-        for head in self.headings:
-            """ Создаем столбцы. Если это стоблец П.И.Б. - делаем ширину больше """
-            if head == 'full_name':
-                self.my_table.heading(head, text=head, anchor=CENTER)
-                self.my_table.column(head, anchor=CENTER, width=193)
-            else:
-                self.my_table.heading(head, text=head, anchor=CENTER)
-                self.my_table.column(head, anchor=CENTER, width=55)
-
-        for row in self.rows:
-            self.my_table.insert('', END, values=row)  # вставляем в каждую строку таблицы нужный кортеж значений
-
-    def close_window(self):
-        """ Устрой дестрой """
-        self.master.destroy()
 
 
 class View:
@@ -180,7 +133,7 @@ class View:
                                 command=lambda: self.the_function(curs, spec, group))
 
         self.go_button.grid(row=8, column=3)
-        print('Ви вибрали: {} курс {} спеціальність {} група'.format(curs, spec, group))
+        # print('Ви вибрали: {} курс {} спеціальність {} група'.format(curs, spec, group))
 
     def the_function(self, curs, spec, group):
         """Функция, которая вызывается при нажатии на <Вибрати> """
@@ -190,6 +143,87 @@ class View:
         # Создаем новое окно
         self.new_window = Toplevel(self.master)
         self.app = View2(self.new_window, curs, spec, group, columns, students)
+
+
+class View2:
+    """ Окно, которое открывается при нажатии на 'Вибрати' """
+    def __init__(self, master, curs, spec, group, headings, rows):
+        self.master = master
+        self.curs = curs
+        self.spec = spec
+        self.group = group
+        self.headings = headings
+        self.rows = rows
+        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
+
+        # style = Style()
+        # style.configure(".", font=('Helvetica', 8))
+        # style.configure("Treeview", foreground='red')
+        # style.configure("Treeview.Heading", foreground='green')
+
+        self.my_table = Treeview(master, show='headings', height=19)  # создаем таблицу
+        self.fill_table()  # заполняем таблицу
+        self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
+
+        self.label_info = Label(master, text='Курс: {}\nСпеціальність: {}\nГрупа: {}'.format(curs, spec, group))
+        self.label_info.grid(row=0, column=0)
+
+        self.quitButton = Button_ttk(master, text='Закрити', width='20', command=self.close_window)
+        self.quitButton.grid(row=2, column=0)
+
+        self.eButton = Button_ttk(master, text='Редагувати таблицю', width='20', command=self.edit)
+        self.eButton.grid(row=2, column=1)
+
+        self.updateButton = Button_ttk(master, text='Оновити таблицю', width='20', command=self.update)
+        self.updateButton.grid(row=2, column=2)
+
+        self.new_window = None
+        self.app = None
+
+    def fill_table(self):
+        """ Работаем с таблицой """
+        self.my_table['columns'] = self.headings  # в 'столбцы' присваиваем переменную
+
+        for head in self.headings:
+            """ Создаем столбцы. Если это стоблец П.И.Б. - делаем ширину больше """
+            if head == 'full_name':
+                self.my_table.heading(head, text=head, anchor=CENTER)
+                self.my_table.column(head, anchor=CENTER, width=193)
+            else:
+                self.my_table.heading(head, text=head, anchor=CENTER)
+                self.my_table.column(head, anchor=CENTER, width=55)
+
+        for row in self.rows:
+            self.my_table.insert('', END, values=row)  # вставляем в каждую строку таблицы нужный кортеж значений
+
+    def edit(self):
+        self.new_window = Toplevel(self.master)
+        self.app = View3(self.new_window, self.curs, self.spec, self.group)
+
+    def update(self):
+        pass
+
+    def close_window(self):
+        """ Устрой дестрой """
+        self.master.destroy()
+
+
+class View3:
+    def __init__(self, master, curs, spec, group):
+        self.master = master
+        self.curs = curs
+        self.spec = spec
+        self.group = group
+        master.wm_geometry("%dx%d+%d+%d" % (400, 300, 800, 200))
+
+        self.label_1 = Label(master, text='Вкажіть id студента')
+        self.label_1.grid(row=0, column=0)
+
+        self.entry_1 = Entry(master, width=5)
+        self.entry_1.grid(row=0, column=1)
+
+        self.button_1 = Button_ttk(master, text='Видалити', width=25, style='Fun.TButton')
+        self.button_1.grid(row=1, column=0, columnspan=2)
 
 
 if __name__ == '__main__':
