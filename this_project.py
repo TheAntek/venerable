@@ -9,7 +9,6 @@ def sql_table(curs, spec, group):
     conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
     cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
     result = cursor.fetchall()  # в переменную присваиваем результата запроса
-
     # print(result)
     conn.close()  # дисконектимся от базы данных
 
@@ -21,11 +20,19 @@ def sql_columns_names(curs, spec, group):
     conn = sqlite3.connect('database\\Curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
     cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос
     columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
-
     # print(columns_names)
     conn.close()  # дисконектимся от базы данных
 
     return columns_names
+
+
+def sql_delete(curs, spec, group, number):
+    """ Удаление студента с базы данных """
+    conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))
+    conn.execute('DELETE FROM {} WHERE id = {}'.format(group.replace('-', '').lower(), number))
+    conn.commit()
+    # print('deleted')
+    conn.close()
 
 
 class View:
@@ -201,7 +208,12 @@ class View2:
         self.app = View3(self.new_window, self.curs, self.spec, self.group)
 
     def update(self):
-        pass
+        self.rows = sql_table(self.curs, self.spec, self.group)
+        self.headings = sql_columns_names(self.curs, self.spec, self.group)
+
+        self.my_table = Treeview(self.master, show='headings', height=19)
+        self.fill_table()  # заполняем таблицу
+        self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
     def close_window(self):
         """ Устрой дестрой """
@@ -222,8 +234,13 @@ class View3:
         self.entry_1 = Entry(master, width=5)
         self.entry_1.grid(row=0, column=1)
 
-        self.button_1 = Button_ttk(master, text='Видалити', width=25, style='Fun.TButton')
+        self.button_1 = Button_ttk(master, text='Видалити', width=25, command=self.delete)
         self.button_1.grid(row=1, column=0, columnspan=2)
+
+    def delete(self):
+        print('deleting')
+        student_id = self.entry_1.get()
+        sql_delete(self.curs, self.spec, self.group, student_id)
 
 
 if __name__ == '__main__':
