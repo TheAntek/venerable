@@ -7,7 +7,7 @@ def sql_table(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
     Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
     conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
+    cursor = conn.execute('SELECT * FROM {};'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
     result = cursor.fetchall()  # в переменную присваиваем результата запроса
     # print(result)
     conn.close()  # дисконектимся от базы данных
@@ -18,7 +18,7 @@ def sql_table(curs, spec, group):
 def sql_columns_names(curs, spec, group):
     """Возвращает названия столбцов"""
     conn = sqlite3.connect('database\\Curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {}'.format(group.replace('-', '').lower()))  # делаем запрос
+    cursor = conn.execute('SELECT * FROM {};'.format(group.replace('-', '').lower()))  # делаем запрос
     columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
     # print(columns_names)
     conn.close()  # дисконектимся от базы данных
@@ -29,9 +29,20 @@ def sql_columns_names(curs, spec, group):
 def sql_delete(curs, spec, group, number):
     """ Удаление студента с базы данных """
     conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))
-    conn.execute('DELETE FROM {} WHERE id = {}'.format(group.replace('-', '').lower(), number))
+    conn.execute('DELETE FROM {} WHERE id = {};'.format(group.replace('-', '').lower(), number))
     conn.commit()
     # print('deleted')
+    conn.close()
+
+
+def sql_insert(curs, spec, group, info):
+    """ Добавление студента в базу данных """
+    conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))
+    # print('INSERT INTO {} VALUES (?, ?, ?);'.format(group.replace('-', '').lower(), number, name, marks))
+    conn.execute('INSERT INTO {} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'.
+                 format(group.replace('-', '').lower()), info)
+    conn.commit()
+    # print('inserted')
     conn.close()
 
 
@@ -228,19 +239,60 @@ class View3:
         self.group = group
         master.wm_geometry("%dx%d+%d+%d" % (400, 300, 800, 200))
 
-        self.label_1 = Label(master, text='Вкажіть id студента')
-        self.label_1.grid(row=0, column=0)
+        # Функционал для добавления значения (labels, entries, buttons)
+        self.label_caption = Label(master, text='Запис студента в базу даних')
+        self.label_caption.grid(row=0, column=0, columnspan=2)
 
-        self.entry_1 = Entry(master, width=5)
-        self.entry_1.grid(row=0, column=1)
+        self.label_create_1 = Label(master, text='ПІБ')
+        self.label_create_1.grid(row=1, column=0)
+        self.entry_create_1 = Entry(master, width=15)
+        self.entry_create_1.grid(row=1, column=1)
 
-        self.button_1 = Button_ttk(master, text='Видалити', width=25, command=self.delete)
-        self.button_1.grid(row=1, column=0, columnspan=2)
+        self.label_create_2 = Label(master, text='id')
+        self.label_create_2.grid(row=2, column=0)
+        self.entry_create_2 = Entry(master, width=3)
+        self.entry_create_2.grid(row=2, column=1)
+
+        self.label_create_3 = Label(master, text='Оцінки')
+        self.label_create_3.grid(row=3, column=0)
+        self.entry_create_3 = Entry(master, width=30)
+        self.entry_create_3.grid(row=3, column=1)
+
+        self.button_create = Button_ttk(master, text='Додати', width=25, command=self.create)
+        self.button_create.grid(row=4, column=0, columnspan=2)
+
+        # Функционал для удаления значения (labels, entries, buttons)
+        self.teh = Label(master)
+        self.teh.grid(row=6, column=0)
+
+        self.label_caption_delete = Label(master, text='Видалення студента з бази даних')
+        self.label_caption_delete.grid(row=10, column=0, columnspan=2)
+
+        self.label_delete = Label(master, text='Вкажіть id студента')
+        self.label_delete.grid(row=11, column=0)
+
+        self.entry_delete = Entry(master, width=3)
+        self.entry_delete.grid(row=11, column=1)
+
+        self.button_delete = Button_ttk(master, text='Видалити', width=25, command=self.delete)
+        self.button_delete.grid(row=12, column=0, columnspan=2)
 
     def delete(self):
         print('deleting')
-        student_id = self.entry_1.get()
-        sql_delete(self.curs, self.spec, self.group, student_id)
+        student_id = self.entry_delete.get()  # получаем id, которое ввел пользователь
+        sql_delete(self.curs, self.spec, self.group, student_id)  # вызываем функцию, которая удаляет студента по id
+
+    def create(self):
+        name = self.entry_create_1.get()
+        number = self.entry_create_2.get()
+        marks = self.entry_create_3.get()  # строка. пример: '90 95 65 70 87 100..'
+
+        info = marks.split(' ')  # формируем спискок оценок
+        info.insert(0, name)  # в начало списка вставляем ФИО студента
+        info.insert(0, number)  # также в начало вставляем номер студента
+        print(info)  # переменная info выглядит след. образом: [id, 'Full Name', 90, 65, 70 ...]
+
+        sql_insert(self.curs, self.spec, self.group, info)
 
 
 if __name__ == '__main__':
