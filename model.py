@@ -24,8 +24,28 @@ class Model:
         conn.close()
         return columns_names
 
+    def sql_delete(self, number):
+        """ Удаление студента с базы данных """
+        conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(self.curs, self.spec))
+        conn.execute('DELETE FROM {} WHERE id = {};'.format(self.group.replace('-', '').lower(), number))
+        conn.commit()
+        # print('deleted')
+        conn.close()
+
+    def sql_insert(self, info):
+        """ Добавление студента в базу данных """
+        conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(self.curs, self.spec))
+        conn.execute('INSERT INTO {} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'.
+                     format(self.group.replace('-', '').lower()), info)
+        conn.commit()
+        conn.close()
+
 
 if __name__ == '__main__':
     new = Model(int(input('curs: ')), input('spec: '), input('group: '))
-    new.select()
-    new.columns()
+    data = new.select()
+    print(new.columns())
+    for row in data:
+        print(row)
+    new.sql_delete(input('id:'))
+    new.sql_insert([input() for i in range(12)])

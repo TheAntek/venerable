@@ -1,8 +1,7 @@
 if __name__ == '__main__':
-
-    from tkinter import *
-    from venerable.controller import Control
+    from venerable.view import View1, View2
+    from tkinter import Tk
 
     root = Tk()
-    app = Control(root)
+    my_gui = View1(root)
     root.mainloop()

@@ -3,7 +3,7 @@ from tkinter.ttk import Treeview, Style, Button as Button_ttk
 import sqlite3
 
 
-def sql_table(curs, spec, group):
+def sql_select(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
     Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
     conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
@@ -155,7 +155,7 @@ class View:
 
     def the_function(self, curs, spec, group):
         """Функция, которая вызывается при нажатии на <Вибрати> """
-        students = sql_table(curs, spec, group)  # students - список кортежей. ex: [('1', '2'), ('3', '4')..]
+        students = sql_select(curs, spec, group)  # students - список кортежей. ex: [('1', '2'), ('3', '4')..]
         columns = sql_columns_names(curs, spec, group)  # columns - список названий столбцов
 
         # Создаем новое окно
@@ -219,7 +219,7 @@ class View2:
         self.app = View3(self.new_window, self.curs, self.spec, self.group)
 
     def update(self):
-        self.rows = sql_table(self.curs, self.spec, self.group)
+        self.rows = sql_select(self.curs, self.spec, self.group)
         self.headings = sql_columns_names(self.curs, self.spec, self.group)
 
         self.my_table = Treeview(self.master, show='headings', height=19)
