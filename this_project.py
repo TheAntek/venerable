@@ -46,6 +46,17 @@ def sql_insert(curs, spec, group, info):
     conn.close()
 
 
+def sql_average(curs, spec, group):
+    conn = sqlite3.connect('database\\Curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
+    cursor = conn.execute('SELECT AVG(mark_1), AVG(mark_2), AVG(mark_3), AVG(mark_4), AVG(mark_5), AVG(mark_6),'
+                          ' AVG(mark_7), AVG(mark_8), AVG(mark_9), AVG(mark_10) FROM {};'
+                          .format(group.replace('-', '').lower()))  # делаем запрос
+    result = cursor.fetchall()
+    print(result)
+    conn.close()  # дисконектимся от базы данных
+    return result
+
+
 class View:
     """ Главное окно """
     options_2 = ('121', '122', '123', '124', '125')  # специальности
@@ -172,6 +183,7 @@ class View2:
         self.group = group
         self.headings = headings
         self.rows = rows
+        self.average = None
         master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
 
         # style = Style()
@@ -194,6 +206,9 @@ class View2:
 
         self.updateButton = Button_ttk(master, text='Оновити таблицю', width='20', command=self.update)
         self.updateButton.grid(row=2, column=2)
+
+        self.button_stat = Button_ttk(master, text='Статистика', width=20, command=self.stats)
+        self.button_stat.grid(row=0, column=2)
 
         self.new_window = None
         self.app = None
@@ -230,6 +245,12 @@ class View2:
         """ Устрой дестрой """
         self.master.destroy()
 
+    def stats(self):
+        self.headings = sql_columns_names(self.curs, self.spec, self.group)
+        self.average = sql_average(self.curs, self.spec, self.group)
+        self.new_window = Toplevel(self.master)
+        self.app = View4(self.new_window, self.headings, self.average)
+
 
 class View3:
     def __init__(self, master, curs, spec, group):
@@ -237,6 +258,9 @@ class View3:
         self.curs = curs
         self.spec = spec
         self.group = group
+        self.marks = []
+        self.counter = 2
+        self.headings = sql_columns_names(self.curs, self.spec, self.group)
         master.wm_geometry("%dx%d+%d+%d" % (400, 300, 800, 200))
 
         # Функционал для добавления значения (labels, entries, buttons)
@@ -253,10 +277,13 @@ class View3:
         self.entry_create_2 = Entry(master, width=3)
         self.entry_create_2.grid(row=2, column=1)
 
-        self.label_create_3 = Label(master, text='Оцінки')
+        self.label_create_3 = Label(master, text=self.headings[self.counter])
         self.label_create_3.grid(row=3, column=0)
         self.entry_create_3 = Entry(master, width=30)
         self.entry_create_3.grid(row=3, column=1)
+
+        self.button_create = Button_ttk(master, text='Ок', width=25, command=self.add_mark)
+        self.button_create.grid(row=4, column=2)
 
         self.button_create = Button_ttk(master, text='Додати', width=25, command=self.create)
         self.button_create.grid(row=4, column=0, columnspan=2)
@@ -277,6 +304,15 @@ class View3:
         self.button_delete = Button_ttk(master, text='Видалити', width=25, command=self.delete)
         self.button_delete.grid(row=12, column=0, columnspan=2)
 
+    def add_mark(self):
+        self.counter += 1
+        self.marks.append(self.entry_create_3.get())
+        print(self.marks)
+        self.label_create_3 = Label(self.master, text=self.headings[self.counter])
+        self.label_create_3.grid(row=3, column=0)
+        self.entry_create_3 = Entry(self.master, width=30)
+        self.entry_create_3.grid(row=3, column=1)
+
     def delete(self):
         print('deleting')
         student_id = self.entry_delete.get()  # получаем id, которое ввел пользователь
@@ -285,14 +321,21 @@ class View3:
     def create(self):
         name = self.entry_create_1.get()
         number = self.entry_create_2.get()
-        marks = self.entry_create_3.get()  # строка. пример: '90 95 65 70 87 100..'
+        info = self.marks  # строка. пример: '90 95 65 70 87 100..'
 
-        info = marks.split(' ')  # формируем спискок оценок
         info.insert(0, name)  # в начало списка вставляем ФИО студента
         info.insert(0, number)  # также в начало вставляем номер студента
         print(info)  # переменная info выглядит след. образом: [id, 'Full Name', 90, 65, 70 ...]
 
         sql_insert(self.curs, self.spec, self.group, info)
+
+
+class View4:
+    def __init__(self, master, headings, average):
+        self.master = master
+        self.headings = headings
+        self.average = average
+        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
 
 
 if __name__ == '__main__':
