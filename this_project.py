@@ -198,17 +198,14 @@ class View2:
         self.label_info = Label(master, text='Курс: {}\nСпеціальність: {}\nГрупа: {}'.format(curs, spec, group))
         self.label_info.grid(row=0, column=0)
 
-        self.quitButton = Button_ttk(master, text='Закрити', width='20', command=self.close_window)
-        self.quitButton.grid(row=2, column=0)
+        self.eButton = Button_ttk(master, text='Редагувати таблицю', width=20, command=self.edit)
+        self.eButton.grid(row=2, column=0)
 
-        self.eButton = Button_ttk(master, text='Редагувати таблицю', width='20', command=self.edit)
-        self.eButton.grid(row=2, column=1)
-
-        self.updateButton = Button_ttk(master, text='Оновити таблицю', width='20', command=self.update)
-        self.updateButton.grid(row=2, column=2)
+        self.updateButton = Button_ttk(master, text='Оновити таблицю', width=20, command=self.update)
+        self.updateButton.grid(row=2, column=1)
 
         self.button_stat = Button_ttk(master, text='Статистика', width=20, command=self.stats)
-        self.button_stat.grid(row=0, column=2)
+        self.button_stat.grid(row=2, column=2)
 
         self.new_window = None
         self.app = None
@@ -240,10 +237,6 @@ class View2:
         self.my_table = Treeview(self.master, show='headings', height=19)
         self.fill_table()  # заполняем таблицу
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
-
-    def close_window(self):
-        """ Устрой дестрой """
-        self.master.destroy()
 
     def stats(self):
         self.headings = sql_columns_names(self.curs, self.spec, self.group)
@@ -279,14 +272,16 @@ class View3:
 
         self.label_create_3 = Label(master, text=self.headings[self.counter])
         self.label_create_3.grid(row=3, column=0)
-        self.entry_create_3 = Entry(master, width=30)
+        self.entry_create_3 = Entry(master, width=3)
         self.entry_create_3.grid(row=3, column=1)
 
-        self.button_create = Button_ttk(master, text='Ок', width=25, command=self.add_mark)
-        self.button_create.grid(row=4, column=2)
+        self.button_create_add = Button_ttk(master, text='Ок', width=3, command=self.add_mark)
+        self.button_create_add.grid(row=3, column=2)
 
-        self.button_create = Button_ttk(master, text='Додати', width=25, command=self.create)
-        self.button_create.grid(row=4, column=0, columnspan=2)
+        self.button_create_final = Button_ttk(master, text='Додати', width=25, command=self.create)
+        self.button_create_final.grid(row=4, column=0, columnspan=2)
+
+        self.label_create_0 = Label(master, text='Оцінки:')
 
         # Функционал для удаления значения (labels, entries, buttons)
         self.teh = Label(master)
@@ -308,10 +303,22 @@ class View3:
         self.counter += 1
         self.marks.append(self.entry_create_3.get())
         print(self.marks)
-        self.label_create_3 = Label(self.master, text=self.headings[self.counter])
-        self.label_create_3.grid(row=3, column=0)
-        self.entry_create_3 = Entry(self.master, width=30)
-        self.entry_create_3.grid(row=3, column=1)
+        self.label_create_3.destroy()
+        self.entry_create_3.destroy()
+        try:
+            self.label_create_3 = Label(self.master, text=self.headings[self.counter])
+        except IndexError:
+            self.label_create_3.destroy()
+            self.entry_create_3.destroy()
+            self.button_create_add.destroy()
+            self.label_create_0.grid(row=3, column=0)
+            self.label_create_3 = Label(self.master, text=self.marks)
+            self.label_create_3.grid(row=3, column=1, columnspan=2)
+        else:
+            self.label_create_3.grid(row=3, column=0)
+            self.label_create_3.grid(row=3, column=0)
+            self.entry_create_3 = Entry(self.master, width=3)
+            self.entry_create_3.grid(row=3, column=1)
 
     def delete(self):
         print('deleting')
