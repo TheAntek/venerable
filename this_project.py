@@ -7,7 +7,7 @@ def sql_select(curs, spec, group):
     """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
     Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
     conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {};'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
+    cursor = conn.execute('SELECT * FROM {} ORDER BY id;'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
     result = cursor.fetchall()  # в переменную присваиваем результата запроса
     # print(result)
     conn.close()  # дисконектимся от базы данных
@@ -79,7 +79,9 @@ class View:
     def __init__(self, master):
         # Настраиваем характеристика главного окна
         self.master = master
-        master['bg'] = 'grey90'
+        # master.overrideredirect(1)
+        # master.geometry("%dx%d+0+0" % (root.winfo_screenwidth(), root.winfo_screenheight()))
+        # master['bg'] = 'grey90'
         master.title('Аналіз Успішності Студентів ФІОТ')
         master.wm_geometry("%dx%d+%d+%d" % (800, 500, 225, 70))  # размер окна + расположение
         # надписи
@@ -87,11 +89,11 @@ class View:
         self.label_spec = Label(self.master, text="Спеціальність ").grid(row=3, column=3)
         self.label_group = Label(master, text="Група").grid(row=5, column=3)
         # кнопочки (выбираем курс)
-        self.my_button1 = Button(master, text='1', command=lambda: self.func_step1(1), width=5)
-        self.my_button2 = Button(master, text='2', command=lambda: self.func_step1(2), width=5)
-        self.my_button3 = Button(master, text='3', command=lambda: self.func_step1(3), width=5)
-        self.my_button4 = Button(master, text='4', command=lambda: self.func_step1(4), width=5)
-        self.my_button5 = Button(master)
+        self.my_button1 = Button_ttk(master, text='1', command=lambda: self.func_step1(1), width=5)
+        self.my_button2 = Button_ttk(master, text='2', command=lambda: self.func_step1(2), width=5)
+        self.my_button3 = Button_ttk(master, text='3', command=lambda: self.func_step1(3), width=5)
+        self.my_button4 = Button_ttk(master, text='4', command=lambda: self.func_step1(4), width=5)
+        self.my_button5 = Button_ttk(master)
         self.my_button1.grid(row=2, column=1)
         self.my_button2.grid(row=2, column=2)
         self.my_button3.grid(row=2, column=3)
@@ -117,16 +119,16 @@ class View:
     def func_step1(self, curs):
         """ Функция, которая вызывается при выборе курса
         Создает и размещает кнопки c нужными специальностями """
-        self.my_button1 = Button(self.master, text=self.options_2[0], width=5,
-                                 command=lambda: self.func_step2(self.options_121[curs-1], curs, self.options_2[0]))
-        self.my_button2 = Button(self.master, text=self.options_2[1], width=5,
-                                 command=lambda: self.func_step2(self.options_122[curs-1], curs, self.options_2[1]))
-        self.my_button3 = Button(self.master, text=self.options_2[2], width=5,
-                                 command=lambda: self.func_step2(self.options_123[curs-1], curs, self.options_2[2]))
-        self.my_button4 = Button(self.master, text=self.options_2[3], width=5,
-                                 command=lambda: self.func_step2(self.options_124[curs-1], curs, self.options_2[3]))
-        self.my_button5 = Button(self.master, text=self.options_2[4], width=5,
-                                 command=lambda: self.func_step2(self.options_125[curs-1], curs, self.options_2[4]))
+        self.my_button1 = Button_ttk(self.master, text=self.options_2[0], width=5,
+                                     command=lambda: self.func_step2(self.options_121[curs-1], curs, self.options_2[0]))
+        self.my_button2 = Button_ttk(self.master, text=self.options_2[1], width=5,
+                                     command=lambda: self.func_step2(self.options_122[curs-1], curs, self.options_2[1]))
+        self.my_button3 = Button_ttk(self.master, text=self.options_2[2], width=5,
+                                     command=lambda: self.func_step2(self.options_123[curs-1], curs, self.options_2[2]))
+        self.my_button4 = Button_ttk(self.master, text=self.options_2[3], width=5,
+                                     command=lambda: self.func_step2(self.options_124[curs-1], curs, self.options_2[3]))
+        self.my_button5 = Button_ttk(self.master, text=self.options_2[4], width=5,
+                                     command=lambda: self.func_step2(self.options_125[curs-1], curs, self.options_2[4]))
 
         self.my_button1.grid(row=4, column=1)
         self.my_button2.grid(row=4, column=2)
@@ -138,16 +140,16 @@ class View:
     def func_step2(self, values, curs, spec):  # параметр values - это список/котреж групп. ex: ('ІО-61', 'ІО-62'..)
         """ Функция, которая вызывается, при выборе специальности
         Создает и размещает кнопки с группами выбраной специальности"""
-        self.my_button1 = Button(self.master, text=values[0], width=5,
-                                 command=lambda: self.chose_group(curs, spec, values[0]))
-        self.my_button2 = Button(self.master, text=values[1], width=5,
-                                 command=lambda: self.chose_group(curs, spec, values[1]))
-        self.my_button3 = Button(self.master, text=values[2], width=5,
-                                 command=lambda: self.chose_group(curs, spec, values[2]))
-        self.my_button4 = Button(self.master, text=values[3], width=5,
-                                 command=lambda: self.chose_group(curs, spec, values[3]))
-        self.my_button5 = Button(self.master, text=values[4], width=5,
-                                 command=lambda: self.chose_group(curs, spec, values[4]))
+        self.my_button1 = Button_ttk(self.master, text=values[0], width=5,
+                                     command=lambda: self.chose_group(curs, spec, values[0]))
+        self.my_button2 = Button_ttk(self.master, text=values[1], width=5,
+                                     command=lambda: self.chose_group(curs, spec, values[1]))
+        self.my_button3 = Button_ttk(self.master, text=values[2], width=5,
+                                     command=lambda: self.chose_group(curs, spec, values[2]))
+        self.my_button4 = Button_ttk(self.master, text=values[3], width=5,
+                                     command=lambda: self.chose_group(curs, spec, values[3]))
+        self.my_button5 = Button_ttk(self.master, text=values[4], width=5,
+                                     command=lambda: self.chose_group(curs, spec, values[4]))
         self.my_button1.grid(row=6, column=1)
         self.my_button2.grid(row=6, column=2)
         self.my_button3.grid(row=6, column=3)
@@ -158,8 +160,7 @@ class View:
     def chose_group(self, curs, spec, group):
         """Функция, которая вызывается при нажатии на <> группу"""
         self.label_result['text'] = 'Курс: {}. Спеціальність {}. Група {}.'.format(curs, spec, group)
-        self.go_button = Button(self.master, text='Вибрати', relief=GROOVE, overrelief=RIDGE, bd=2,
-                                command=lambda: self.the_function(curs, spec, group))
+        self.go_button = Button_ttk(self.master, text='Вибрати', command=lambda: self.the_function(curs, spec, group))
 
         self.go_button.grid(row=8, column=3)
         # print('Ви вибрали: {} курс {} спеціальність {} група'.format(curs, spec, group))
@@ -240,9 +241,9 @@ class View2:
 
     def stats(self):
         self.headings = sql_columns_names(self.curs, self.spec, self.group)
-        self.average = sql_average(self.curs, self.spec, self.group)
+        self.average = sql_average(self.curs, self.spec, self.group)[0]
         self.new_window = Toplevel(self.master)
-        self.app = View4(self.new_window, self.headings, self.average)
+        self.app = View4(self.new_window, self.headings, self.average, self.group)
 
 
 class View3:
@@ -338,11 +339,15 @@ class View3:
 
 
 class View4:
-    def __init__(self, master, headings, average):
+    def __init__(self, master, headings, average, group):
         self.master = master
         self.headings = headings
         self.average = average
-        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
+        self.group = group
+        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 275, 120))
+
+        self.label1 = Label(master, text='Середній бал групи {}: {}'.format(group, sum(average)/len(average)))
+        self.label1.grid(row=1, column=1)
 
 
 if __name__ == '__main__':
