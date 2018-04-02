@@ -60,7 +60,7 @@ def sql_average(curs, spec, group):
     return result
 
 
-class View:
+class View1:
     """ Главное окно """
     options_2 = ('121', '122', '123', '124', '125')  # специальности
     # все группы каждой специальности
@@ -188,27 +188,26 @@ class View2:
         self.headings = headings
         self.rows = rows
         self.average = None
-        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 250, 95))
+        master.wm_geometry("%dx%d+%d+%d" % (800, 511, 250, 70))
 
-        # style = Style()
-        # style.configure(".", font=('Helvetica', 8))
-        # style.configure("Treeview", foreground='red')
-        # style.configure("Treeview.Heading", foreground='green')
+        style = Style()
+        style.configure("mystyle.Treeview", highlightthickness=1, bd=1, rowheight=14)
+        style.configure("mystyle.Treeview.Heading", font=('Calibri', 11, 'bold'))  # Modify the font of the headings
 
-        self.my_table = Treeview(master, show='headings', height=19)  # создаем таблицу
+        self.my_table = Treeview(master, show='headings', height=30, style="mystyle.Treeview")  # создаем таблицу
         self.fill_table()  # заполняем таблицу
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
-        self.label_info = Label(master, text='Курс: {}\nСпеціальність: {}\nГрупа: {}'.format(curs, spec, group))
-        self.label_info.grid(row=0, column=0)
+        self.label_info = Label(master, text='Статистика групи {}'.format(group), font='Arial 15', foreground='gray20')
+        self.label_info.grid(row=0, column=1)
 
-        self.eButton = Button_ttk(master, text='Редагувати таблицю', width=20, command=self.edit)
+        self.eButton = Button_ttk(master, text='Редагувати таблицю', width=19, command=self.edit, style='my.TButton')
         self.eButton.grid(row=2, column=0)
 
-        self.updateButton = Button_ttk(master, text='Оновити таблицю', width=20, command=self.update)
+        self.updateButton = Button_ttk(master, text='Оновити таблицю', width=19, command=self.update, style='my.TButton')
         self.updateButton.grid(row=2, column=1)
 
-        self.button_stat = Button_ttk(master, text='Статистика', width=20, command=self.stats)
+        self.button_stat = Button_ttk(master, text='Статистика', width=19, command=self.stats, style='my.TButton')
         self.button_stat.grid(row=2, column=2)
 
         self.new_window = None
@@ -227,8 +226,15 @@ class View2:
                 self.my_table.heading(head, text=head, anchor=CENTER)
                 self.my_table.column(head, anchor=CENTER, width=55)
 
+        counter = 0
+        self.my_table.tag_configure('odd', background='#FFFFFF')
+        self.my_table.tag_configure('even', background='#F2F2F2')
         for row in self.rows:
-            self.my_table.insert('', END, values=row)  # вставляем в каждую строку таблицы нужный кортеж значений
+            if counter % 2 == 1:
+                self.my_table.insert('', END, values=row, tags=('odd',))  # вставляем в каждую строку таблицы
+            else:
+                self.my_table.insert('', END, values=row, tags=('even',))
+            counter += 1
 
     def edit(self):
         self.new_window = Toplevel(self.master)
@@ -238,7 +244,7 @@ class View2:
         self.rows = sql_select(self.curs, self.spec, self.group)
         self.headings = sql_columns_names(self.curs, self.spec, self.group)
 
-        self.my_table = Treeview(self.master, show='headings', height=19)
+        self.my_table = Treeview(self.master, show='headings', height=30, style="mystyle.Treeview")
         self.fill_table()  # заполняем таблицу
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
@@ -377,5 +383,5 @@ class View4:
 
 if __name__ == '__main__':
     root = Tk()
-    my_gui = View(root)
+    my_gui = View1(root)
     root.mainloop()
