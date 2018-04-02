@@ -204,8 +204,8 @@ class View2:
         self.eButton = Button_ttk(master, text='Редагувати таблицю', width=19, command=self.edit, style='my.TButton')
         self.eButton.grid(row=2, column=0)
 
-        self.updateButton = Button_ttk(master, text='Оновити таблицю', width=19, command=self.update, style='my.TButton')
-        self.updateButton.grid(row=2, column=1)
+        self.updButton = Button_ttk(master, text='Оновити таблицю', width=19, command=self.update, style='my.TButton')
+        self.updButton.grid(row=2, column=1)
 
         self.button_stat = Button_ttk(master, text='Статистика', width=19, command=self.stats, style='my.TButton')
         self.button_stat.grid(row=2, column=2)
@@ -237,10 +237,12 @@ class View2:
             counter += 1
 
     def edit(self):
+        """ Редактировать таблицу """
         self.new_window = Toplevel(self.master)
         self.app = View3(self.new_window, self.curs, self.spec, self.group)
 
     def update(self):
+        """ Обновить таблицу (Заново берем данные с базы данных и создаем новую таблицу) """
         self.rows = sql_select(self.curs, self.spec, self.group)
         self.headings = sql_columns_names(self.curs, self.spec, self.group)
 
@@ -249,6 +251,7 @@ class View2:
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
     def stats(self):
+        """ Новое окно, где размещается диаграмма """
         self.headings = sql_columns_names(self.curs, self.spec, self.group)[2::]
         self.average = sql_average(self.curs, self.spec, self.group)[0]
         self.new_window = Toplevel(self.master)
@@ -268,46 +271,43 @@ class View3:
 
         # Функционал для добавления значения (labels, entries, buttons)
         self.label_caption = Label(master, text='Запис студента в базу даних')
-        self.label_caption.grid(row=0, column=0, columnspan=2)
+        self.label_caption.place(x=10, y=10)
 
         self.label_create_1 = Label(master, text='ПІБ')
-        self.label_create_1.grid(row=1, column=0)
+        self.label_create_1.place(x=10, y=40)
         self.entry_create_1 = Entry(master, width=15)
-        self.entry_create_1.grid(row=1, column=1)
+        self.entry_create_1.place(x=70, y=40)
 
         self.label_create_2 = Label(master, text='id')
-        self.label_create_2.grid(row=2, column=0)
+        self.label_create_2.place(x=10, y=70)
         self.entry_create_2 = Entry(master, width=3)
-        self.entry_create_2.grid(row=2, column=1)
+        self.entry_create_2.place(x=70, y=70)
 
         self.label_create_3 = Label(master, text=self.headings[self.counter])
-        self.label_create_3.grid(row=3, column=0)
+        self.label_create_3.place(x=10, y=100)
         self.entry_create_3 = Entry(master, width=3)
-        self.entry_create_3.grid(row=3, column=1)
+        self.entry_create_3.place(x=70, y=100)
 
-        self.button_create_add = Button_ttk(master, text='Ок', width=3, command=self.add_mark)
-        self.button_create_add.grid(row=3, column=2)
+        self.button_create_add = Button_ttk(master, text='Ок', command=self.add_mark, width=5)
+        self.button_create_add.place(x=130, y=97)
 
         self.button_create_final = Button_ttk(master, text='Додати', width=25, command=self.create)
-        self.button_create_final.grid(row=4, column=0, columnspan=2)
+        self.button_create_final.place(x=10, y=130)
 
         self.label_create_0 = Label(master, text='Оцінки:')
 
         # Функционал для удаления значения (labels, entries, buttons)
-        self.teh = Label(master)
-        self.teh.grid(row=6, column=0)
-
         self.label_caption_delete = Label(master, text='Видалення студента з бази даних')
-        self.label_caption_delete.grid(row=10, column=0, columnspan=2)
+        self.label_caption_delete.place(x=10, y=170)
 
-        self.label_delete = Label(master, text='Вкажіть id студента')
-        self.label_delete.grid(row=11, column=0)
+        self.label_delete = Label(master, text='id')
+        self.label_delete.place(x=10, y=200)
 
         self.entry_delete = Entry(master, width=3)
-        self.entry_delete.grid(row=11, column=1)
+        self.entry_delete.place(x=70, y=200)
 
         self.button_delete = Button_ttk(master, text='Видалити', width=25, command=self.delete)
-        self.button_delete.grid(row=12, column=0, columnspan=2)
+        self.button_delete.place(x=10, y=230)
 
     def add_mark(self):
         self.counter += 1
@@ -321,17 +321,16 @@ class View3:
             self.label_create_3.destroy()
             self.entry_create_3.destroy()
             self.button_create_add.destroy()
-            self.label_create_0.grid(row=3, column=0)
+            self.label_create_0.place(x=10, y=100)
             self.label_create_3 = Label(self.master, text=self.marks)
-            self.label_create_3.grid(row=3, column=1, columnspan=2)
+            self.label_create_3.place(x=65, y=100)
         else:
-            self.label_create_3.grid(row=3, column=0)
-            self.label_create_3.grid(row=3, column=0)
+            self.label_create_3.place(x=10, y=100)
             self.entry_create_3 = Entry(self.master, width=3)
-            self.entry_create_3.grid(row=3, column=1)
+            self.entry_create_3.place(x=70, y=100)
 
     def delete(self):
-        print('deleting')
+        # print('deleting')
         student_id = self.entry_delete.get()  # получаем id, которое ввел пользователь
         sql_delete(self.curs, self.spec, self.group, student_id)  # вызываем функцию, которая удаляет студента по id
 
@@ -354,7 +353,7 @@ class View4:
         self.headings = headings
         self.average = average
         self.group = group
-        master.wm_geometry("%dx%d+%d+%d" % (600, 450, 450, 120))
+        master.wm_geometry("%dx%d+%d+%d" % (600, 450, 450, 100))
 
         self.fig = self.diagram()
         canvas = FigureCanvasTkAgg(self.fig, master)
