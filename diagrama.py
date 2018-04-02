@@ -3,6 +3,7 @@ import sqlite3
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import *
+from numpy import arange
 
 
 def sql_columns_names(curs, spec, group):
@@ -27,26 +28,20 @@ def sql_average(curs, spec, group):
 
 
 def my_figure():
-    # headings = sql_columns_names(2, 123, 'IO-61')[2::]
+    # headings = sorted(sql_columns_names(2, 123, 'IO-61')[2::])
     average = sql_average(2, 123, 'IO-61')[0]
     headings = sorted(['eng', 'ipz', 'oop', 'mat', 'mo', 'okk', 'amo', 'fp', 'uk', 'eco'])
-    n = [1,2,3,4,5,6,7,8,9,10]
+    n = arange(1, len(headings)+1)
     print(headings, '\n', average)
 
-    figure = Figure()
+    figure = Figure(figsize=(8, 5))
+    figure.suptitle('Успішність студентів групи IO-61\nСередній бал групи: 87.5')
     ax = figure.add_subplot(111)
     ax.bar(headings, average)
     for x, y in zip(n, average):
         ax.text(x-1.35, y-5, '%.1f' % y, color='white')
     figure.autofmt_xdate(bottom=0.2, rotation=50)
     return figure
-
-    # x = range(len(average))
-    # ax = plt.gca()
-    # ax.bar(x, average)
-    # ax.set_xticks(x)
-    # ax.set_xticklabels(headings)
-    # plt.show()
 
 
 root = Tk()

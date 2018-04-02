@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter.ttk import Treeview, Style, Button as Button_ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from numpy import arange
 import sqlite3
 
 
@@ -341,27 +342,36 @@ class View3:
 
 
 class View4:
+    """ Окно, где размещается диаграмма """
     def __init__(self, master, headings, average, group):
         self.master = master
         self.headings = headings
         self.average = average
         self.group = group
-        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 275, 120))
+        master.wm_geometry("%dx%d+%d+%d" % (600, 450, 450, 120))
 
         self.fig = self.diagram()
         canvas = FigureCanvasTkAgg(self.fig, master)
         canvas.show()
         canvas.get_tk_widget().pack()
 
-        self.label1 = Label(master, text='Середній бал групи {}: {}'.format(group, sum(average)/len(average)))
-        self.label1.pack()
-
     def diagram(self):
+        """ Построение гистрограммы """
+        self.headings = sorted(self.headings)  # для коректного отображения чисел на гистограмме
         print(self.headings, '\n', self.average)
+        num = arange(1, len(self.headings) + 1)  # список значений оси х
 
         figure = Figure()
-        ax = figure.add_subplot(111)
-        ax.bar(self.headings, self.average)
+        figure.suptitle('Успішніть студентів групи {}\nСередній бал: {}'.
+                        format(self.group, sum(self.average)/len(self.average)))  # название графика (сверху)
+
+        ax = figure.add_subplot(111)  # создаем полотно
+        ax.bar(self.headings, self.average)  # гистограмма с значениями х и у
+        figure.autofmt_xdate(bottom=0.2, rotation=50)  # формат подписей снизу
+
+        for x, y in zip(num, self.average):
+            ax.text(x - 1.35, y - 5, '%.1f' % y, color='white')  # подписываем каждый столбец
+
         return figure
 
 
