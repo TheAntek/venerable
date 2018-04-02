@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter.ttk import Treeview, Style, Button as Button_ttk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sqlite3
 
 
@@ -240,7 +242,7 @@ class View2:
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
     def stats(self):
-        self.headings = sql_columns_names(self.curs, self.spec, self.group)
+        self.headings = sql_columns_names(self.curs, self.spec, self.group)[2::]
         self.average = sql_average(self.curs, self.spec, self.group)[0]
         self.new_window = Toplevel(self.master)
         self.app = View4(self.new_window, self.headings, self.average, self.group)
@@ -346,8 +348,21 @@ class View4:
         self.group = group
         master.wm_geometry("%dx%d+%d+%d" % (800, 500, 275, 120))
 
+        self.fig = self.diagram()
+        canvas = FigureCanvasTkAgg(self.fig, master)
+        canvas.show()
+        canvas.get_tk_widget().pack()
+
         self.label1 = Label(master, text='Середній бал групи {}: {}'.format(group, sum(average)/len(average)))
-        self.label1.grid(row=1, column=1)
+        self.label1.pack()
+
+    def diagram(self):
+        print(self.headings, '\n', self.average)
+
+        figure = Figure()
+        ax = figure.add_subplot(111)
+        ax.bar(self.headings, self.average)
+        return figure
 
 
 if __name__ == '__main__':
