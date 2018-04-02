@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter.ttk import Treeview, Style, Button as Button_ttk
+from tkinter.ttk import Treeview, Style, Button as Button_ttk, Label as Label_ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from numpy import arange
@@ -86,33 +86,33 @@ class View:
         # master.geometry("%dx%d+0+0" % (root.winfo_screenwidth(), root.winfo_screenheight()))
         # master['bg'] = 'grey90'
         master.title('Аналіз Успішності Студентів ФІОТ')
-        master.wm_geometry("%dx%d+%d+%d" % (800, 500, 225, 70))  # размер окна + расположение
-        # надписи
-        self.label_curs = Label(master, text="Курс").grid(row=1, column=3)
-        self.label_spec = Label(self.master, text="Спеціальність ").grid(row=3, column=3)
-        self.label_group = Label(master, text="Група").grid(row=5, column=3)
-        # кнопочки (выбираем курс)
-        self.my_button1 = Button_ttk(master, text='1', command=lambda: self.func_step1(1), width=5)
-        self.my_button2 = Button_ttk(master, text='2', command=lambda: self.func_step1(2), width=5)
-        self.my_button3 = Button_ttk(master, text='3', command=lambda: self.func_step1(3), width=5)
-        self.my_button4 = Button_ttk(master, text='4', command=lambda: self.func_step1(4), width=5)
-        self.my_button5 = Button_ttk(master)
-        self.my_button1.grid(row=2, column=1)
-        self.my_button2.grid(row=2, column=2)
-        self.my_button3.grid(row=2, column=3)
-        self.my_button4.grid(row=2, column=4)
+        master.wm_geometry("%dx%d+%d+%d" % (850, 500, 225, 70))  # размер окна + расположение
+        fon = 'Verdana 20'
+        fon2 = 'Verdana 14'
+        s = Style()
+        s.configure('my.TButton', font='Verdana 15')
 
-        # технические лейблы
-        self.label_technical_1 = Label(master, width=40, height=10)  # для пустого пространства слева и сверху
-        self.label_technical_1.grid(row=0, column=0)
-        self.label_technical_2 = Label(master, width=10, height=5)  # для пустого пространства между кнопкой1 и кн2
-        self.label_technical_2.grid(row=3, column=0, rowspan=2)
-        self.label_technical_3 = Label(master, width=40, height=2)  # для пустого пространства перед Кнопкой сверху
-        self.label_technical_3.grid(row=6, column=0)
+        # надписи
+
+        self.label_curs = Label_ttk(master, text="Курс", font=fon).place(x=50, y=50)
+        self.label_spec = Label_ttk(self.master, text="Спеціальність ", font=fon).place(x=50, y=150)
+        self.label_group = Label_ttk(master, text="Група", font=fon).place(x=50, y=250)
+        # кнопочки (выбираем курс)
+        # style = Style()
+        # style.configure('BW.TLabel', foreground='black', background='white', font='Arial 20')
+        self.my_button1 = Button_ttk(master, text='1', command=lambda: self.func_step1(1), style='my.TButton', width=7)
+        self.my_button2 = Button_ttk(master, text='2', command=lambda: self.func_step1(2), style='my.TButton', width=7)
+        self.my_button3 = Button_ttk(master, text='3', command=lambda: self.func_step1(3), style='my.TButton', width=7)
+        self.my_button4 = Button_ttk(master, text='4', command=lambda: self.func_step1(4), style='my.TButton', width=7)
+        self.my_button5 = Button_ttk(master)
+        self.my_button1.place(x=300, y=50)
+        self.my_button2.place(x=400, y=50)
+        self.my_button3.place(x=500, y=50)
+        self.my_button4.place(x=600, y=50)
 
         # лейбл, который отображает, что вы выбрали в первом окне
-        self.label_result = Label(self.master)
-        self.label_result.grid(row=7, column=2, columnspan=5)
+        self.label_result = Label(self.master, font=fon2, foreground='gray30')
+        self.label_result.place(x=237, y=375)
 
         self.go_button = None  # кнопка 'вибрати'
         self.new_window = None  # второе окно делаем
@@ -122,50 +122,50 @@ class View:
     def func_step1(self, curs):
         """ Функция, которая вызывается при выборе курса
         Создает и размещает кнопки c нужными специальностями """
-        self.my_button1 = Button_ttk(self.master, text=self.options_2[0], width=5,
+        self.my_button1 = Button_ttk(self.master, text=self.options_2[0], style='my.TButton', width=7,
                                      command=lambda: self.func_step2(self.options_121[curs-1], curs, self.options_2[0]))
-        self.my_button2 = Button_ttk(self.master, text=self.options_2[1], width=5,
+        self.my_button2 = Button_ttk(self.master, text=self.options_2[1], style='my.TButton', width=7,
                                      command=lambda: self.func_step2(self.options_122[curs-1], curs, self.options_2[1]))
-        self.my_button3 = Button_ttk(self.master, text=self.options_2[2], width=5,
+        self.my_button3 = Button_ttk(self.master, text=self.options_2[2], style='my.TButton', width=7,
                                      command=lambda: self.func_step2(self.options_123[curs-1], curs, self.options_2[2]))
-        self.my_button4 = Button_ttk(self.master, text=self.options_2[3], width=5,
+        self.my_button4 = Button_ttk(self.master, text=self.options_2[3], style='my.TButton', width=7,
                                      command=lambda: self.func_step2(self.options_124[curs-1], curs, self.options_2[3]))
-        self.my_button5 = Button_ttk(self.master, text=self.options_2[4], width=5,
+        self.my_button5 = Button_ttk(self.master, text=self.options_2[4], style='my.TButton', width=7,
                                      command=lambda: self.func_step2(self.options_125[curs-1], curs, self.options_2[4]))
 
-        self.my_button1.grid(row=4, column=1)
-        self.my_button2.grid(row=4, column=2)
-        self.my_button3.grid(row=4, column=3)
-        self.my_button4.grid(row=4, column=4)
-        self.my_button5.grid(row=4, column=6)
+        self.my_button1.place(x=300, y=150)
+        self.my_button2.place(x=400, y=150)
+        self.my_button3.place(x=500, y=150)
+        self.my_button4.place(x=600, y=150)
+        self.my_button5.place(x=700, y=150)
 
     # Функции второго шага
     def func_step2(self, values, curs, spec):  # параметр values - это список/котреж групп. ex: ('ІО-61', 'ІО-62'..)
         """ Функция, которая вызывается, при выборе специальности
         Создает и размещает кнопки с группами выбраной специальности"""
-        self.my_button1 = Button_ttk(self.master, text=values[0], width=5,
+        self.my_button1 = Button_ttk(self.master, text=values[0], style='my.TButton', width=7,
                                      command=lambda: self.chose_group(curs, spec, values[0]))
-        self.my_button2 = Button_ttk(self.master, text=values[1], width=5,
+        self.my_button2 = Button_ttk(self.master, text=values[1], style='my.TButton', width=7,
                                      command=lambda: self.chose_group(curs, spec, values[1]))
-        self.my_button3 = Button_ttk(self.master, text=values[2], width=5,
+        self.my_button3 = Button_ttk(self.master, text=values[2], style='my.TButton', width=7,
                                      command=lambda: self.chose_group(curs, spec, values[2]))
-        self.my_button4 = Button_ttk(self.master, text=values[3], width=5,
+        self.my_button4 = Button_ttk(self.master, text=values[3], style='my.TButton', width=7,
                                      command=lambda: self.chose_group(curs, spec, values[3]))
-        self.my_button5 = Button_ttk(self.master, text=values[4], width=5,
+        self.my_button5 = Button_ttk(self.master, text=values[4], style='my.TButton', width=7,
                                      command=lambda: self.chose_group(curs, spec, values[4]))
-        self.my_button1.grid(row=6, column=1)
-        self.my_button2.grid(row=6, column=2)
-        self.my_button3.grid(row=6, column=3)
-        self.my_button4.grid(row=6, column=4)
-        self.my_button5.grid(row=6, column=6)
+        self.my_button1.place(x=300, y=250)
+        self.my_button2.place(x=400, y=250)
+        self.my_button3.place(x=500, y=250)
+        self.my_button4.place(x=600, y=250)
+        self.my_button5.place(x=700, y=250)
 
     # Функции третьего шага
     def chose_group(self, curs, spec, group):
         """Функция, которая вызывается при нажатии на <> группу"""
-        self.label_result['text'] = 'Курс: {}. Спеціальність {}. Група {}.'.format(curs, spec, group)
-        self.go_button = Button_ttk(self.master, text='Вибрати', command=lambda: self.the_function(curs, spec, group))
-
-        self.go_button.grid(row=8, column=3)
+        self.label_result['text'] = 'Курс: {}     Спеціальність: {}     Група: {}'.format(curs, spec, group)
+        self.go_button = Button_ttk(self.master, text='Вибрати', style='my.TButton', width=15,
+                                    command=lambda: self.the_function(curs, spec, group))
+        self.go_button.place(x=340, y=420)
         # print('Ви вибрали: {} курс {} спеціальність {} група'.format(curs, spec, group))
 
     def the_function(self, curs, spec, group):
