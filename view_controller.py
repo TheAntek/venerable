@@ -1,63 +1,10 @@
-from tkinter import *
-from tkinter.ttk import Treeview, Style, Button as Button_ttk, Label as Label_ttk
+from venerable.model import Model
+from tkinter import Label, Toplevel, CENTER, END, Entry, Tk
+from tkinter.ttk import Treeview, Style, Button as Button_ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from numpy import arange
 import sqlite3
-
-
-def sql_select(curs, spec, group):
-    """Есть папки курсов. В них есть базы данных специальностей этого курса. В каждой бд есть таблицы групп
-    Например: curs_2/spec_123.db (Таблица io61 в этой базе данных)"""
-    conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {} ORDER BY id;'.format(group.replace('-', '').lower()))  # делаем запрос. IO-61 --> io61
-    result = cursor.fetchall()  # в переменную присваиваем результата запроса
-    # print(result)
-    conn.close()  # дисконектимся от базы данных
-
-    return result
-
-
-def sql_columns_names(curs, spec, group):
-    """Возвращает названия столбцов"""
-    conn = sqlite3.connect('database\\Curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
-    cursor = conn.execute('SELECT * FROM {};'.format(group.replace('-', '').lower()))  # делаем запрос
-    columns_names = [desc[0] for desc in cursor.description]  # получаем название стобцов
-    # print(columns_names)
-    conn.close()  # дисконектимся от базы данных
-
-    return columns_names
-
-
-def sql_delete(curs, spec, group, number):
-    """ Удаление студента с базы данных """
-    conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))
-    conn.execute('DELETE FROM {} WHERE id = {};'.format(group.replace('-', '').lower(), number))
-    conn.commit()
-    # print('deleted')
-    conn.close()
-
-
-def sql_insert(curs, spec, group, info):
-    """ Добавление студента в базу данных """
-    conn = sqlite3.connect('database\\curs_{}\\spec{}_v2.db'.format(curs, spec))
-    # print('INSERT INTO {} VALUES (?, ?, ?);'.format(group.replace('-', '').lower(), number, name, marks))
-    conn.execute('INSERT INTO {} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'.
-                 format(group.replace('-', '').lower()), info)
-    conn.commit()
-    # print('inserted')
-    conn.close()
-
-
-def sql_average(curs, spec, group):
-    conn = sqlite3.connect('database\\Curs_{}\\spec{}_v2.db'.format(curs, spec))  # конектимся к базе данных
-    cursor = conn.execute('SELECT AVG(mark_1), AVG(mark_2), AVG(mark_3), AVG(mark_4), AVG(mark_5), AVG(mark_6),'
-                          ' AVG(mark_7), AVG(mark_8), AVG(mark_9), AVG(mark_10) FROM {};'
-                          .format(group.replace('-', '').lower()))  # делаем запрос
-    result = cursor.fetchall()
-    # print(result)
-    conn.close()  # дисконектимся от базы данных
-    return result
 
 
 class View1:
@@ -93,10 +40,9 @@ class View1:
         s.configure('my.TButton', font='Verdana 15')
 
         # надписи
-
-        self.label_curs = Label_ttk(master, text="Курс", font=fon).place(x=50, y=50)
-        self.label_spec = Label_ttk(self.master, text="Спеціальність ", font=fon).place(x=50, y=150)
-        self.label_group = Label_ttk(master, text="Група", font=fon).place(x=50, y=250)
+        self.label_curs = Label(master, text="Курс", font=fon).place(x=50, y=50)
+        self.label_spec = Label(self.master, text="Спеціальність ", font=fon).place(x=50, y=150)
+        self.label_group = Label(master, text="Група", font=fon).place(x=50, y=250)
         # кнопочки (выбираем курс)
         # style = Style()
         # style.configure('BW.TLabel', foreground='black', background='white', font='Arial 20')
@@ -170,8 +116,9 @@ class View1:
 
     def the_function(self, curs, spec, group):
         """Функция, которая вызывается при нажатии на <Вибрати> """
-        students = sql_select(curs, spec, group)  # students - список кортежей. ex: [('1', '2'), ('3', '4')..]
-        columns = sql_columns_names(curs, spec, group)  # columns - список названий столбцов
+        simple = Model(curs, spec, group)
+        students = simple.sql_select()  # students - список кортежей. ex: [('1', '2'), ('3', '4')..]
+        columns = simple.sql_columns_names()  # columns - список названий столбцов
 
         # Создаем новое окно
         self.new_window = Toplevel(self.master)
@@ -198,7 +145,8 @@ class View2:
         self.fill_table()  # заполняем таблицу
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
-        self.label_info = Label(master, text='Успішність студентів групи {}'.format(group), font='Arial 15', foreground='gray20')
+        self.label_info = Label(master, text='Успішність студентів групи {}'.format(group), font='Arial 15',
+                                foreground='gray20')
         self.label_info.grid(row=0, column=0, columnspan=3)
 
         self.eButton = Button_ttk(master, text='Редагувати таблицю', width=19, command=self.edit, style='my.TButton')
@@ -243,8 +191,9 @@ class View2:
 
     def update(self):
         """ Обновить таблицу (Заново берем данные с базы данных и создаем новую таблицу) """
-        self.rows = sql_select(self.curs, self.spec, self.group)
-        self.headings = sql_columns_names(self.curs, self.spec, self.group)
+        simple = Model(self.curs, self.spec, self.group)
+        self.rows = simple.sql_select()
+        self.headings = simple.sql_columns_names()
 
         self.my_table = Treeview(self.master, show='headings', height=30, style="mystyle.Treeview")
         self.fill_table()  # заполняем таблицу
@@ -252,8 +201,9 @@ class View2:
 
     def stats(self):
         """ Новое окно, где размещается диаграмма """
-        self.headings = sql_columns_names(self.curs, self.spec, self.group)[2::]
-        self.average = sql_average(self.curs, self.spec, self.group)[0]
+        simple = Model(self.curs, self.spec, self.group)
+        self.headings = simple.sql_columns_names()[2::]
+        self.average = simple.sql_average()[0]
         self.new_window = Toplevel(self.master)
         self.app = View4(self.new_window, self.headings, self.average, self.group)
 
@@ -269,7 +219,8 @@ class View3:
         self.group = group
         self.marks = []
         self.counter = 2
-        self.headings = sql_columns_names(self.curs, self.spec, self.group)
+        self.simple = Model(self.curs, self.spec, self.group)
+        self.headings = self.simple.sql_columns_names()
         master.wm_geometry("%dx%d+%d+%d" % (355, 290, 800, 200))
 
         # Функционал для добавления значения (labels, entries, buttons)
@@ -339,7 +290,7 @@ class View3:
         # print('deleting')
         try:
             student_id = self.entry_delete.get()  # получаем id, которое ввел пользователь
-            sql_delete(self.curs, self.spec, self.group, student_id)  # вызываем функцию, которая удаляет студента
+            self.simple.sql_delete(student_id)  # вызываем функцию, которая удаляет студента
         except sqlite3.OperationalError:
             self.label_info_2.place(x=200, y=255)
         else:
@@ -355,7 +306,7 @@ class View3:
             info.insert(0, number)  # также в начало вставляем номер студента
             # print(info)  # переменная info выглядит след. образом: [id, 'Full Name', 90, 65, 70 ...]
 
-            sql_insert(self.curs, self.spec, self.group, info)
+            self.simple.sql_insert(info)
         except sqlite3.ProgrammingError:
             self.label_info_1.place(x=200, y=135)
         else:
