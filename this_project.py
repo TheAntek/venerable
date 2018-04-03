@@ -55,7 +55,7 @@ def sql_average(curs, spec, group):
                           ' AVG(mark_7), AVG(mark_8), AVG(mark_9), AVG(mark_10) FROM {};'
                           .format(group.replace('-', '').lower()))  # делаем запрос
     result = cursor.fetchall()
-    print(result)
+    # print(result)
     conn.close()  # дисконектимся от базы данных
     return result
 
@@ -198,8 +198,8 @@ class View2:
         self.fill_table()  # заполняем таблицу
         self.my_table.grid(row=1, column=0, columnspan=3)  # выводим таблицу
 
-        self.label_info = Label(master, text='Статистика групи {}'.format(group), font='Arial 15', foreground='gray20')
-        self.label_info.grid(row=0, column=1)
+        self.label_info = Label(master, text='Успішність студентів групи {}'.format(group), font='Arial 15', foreground='gray20')
+        self.label_info.grid(row=0, column=0, columnspan=3)
 
         self.eButton = Button_ttk(master, text='Редагувати таблицю', width=19, command=self.edit, style='my.TButton')
         self.eButton.grid(row=2, column=0)
@@ -259,6 +259,9 @@ class View2:
 
 
 class View3:
+    fon_title = 'Verdana 14'
+    fon_normal = 'Verdana 10'
+
     def __init__(self, master, curs, spec, group):
         self.master = master
         self.curs = curs
@@ -267,83 +270,96 @@ class View3:
         self.marks = []
         self.counter = 2
         self.headings = sql_columns_names(self.curs, self.spec, self.group)
-        master.wm_geometry("%dx%d+%d+%d" % (400, 300, 800, 200))
+        master.wm_geometry("%dx%d+%d+%d" % (355, 290, 800, 200))
 
         # Функционал для добавления значения (labels, entries, buttons)
-        self.label_caption = Label(master, text='Запис студента в базу даних')
+        self.label_caption = Label(master, text='Запис студента в базу даних', font=self.fon_title)
         self.label_caption.place(x=10, y=10)
 
-        self.label_create_1 = Label(master, text='ПІБ')
-        self.label_create_1.place(x=10, y=40)
+        self.label_create_1 = Label(master, text='ПІБ', font=self.fon_normal)
+        self.label_create_1.place(x=10, y=45)
         self.entry_create_1 = Entry(master, width=15)
-        self.entry_create_1.place(x=70, y=40)
+        self.entry_create_1.place(x=70, y=45)
 
-        self.label_create_2 = Label(master, text='id')
-        self.label_create_2.place(x=10, y=70)
+        self.label_create_2 = Label(master, text='id', font=self.fon_normal)
+        self.label_create_2.place(x=10, y=75)
         self.entry_create_2 = Entry(master, width=3)
-        self.entry_create_2.place(x=70, y=70)
+        self.entry_create_2.place(x=70, y=75)
 
-        self.label_create_3 = Label(master, text=self.headings[self.counter])
-        self.label_create_3.place(x=10, y=100)
+        self.label_create_3 = Label(master, text=self.headings[self.counter], font=self.fon_normal)
+        self.label_create_3.place(x=10, y=105)
         self.entry_create_3 = Entry(master, width=3)
-        self.entry_create_3.place(x=70, y=100)
+        self.entry_create_3.place(x=70, y=105)
 
-        self.button_create_add = Button_ttk(master, text='Ок', command=self.add_mark, width=5)
-        self.button_create_add.place(x=130, y=97)
+        self.button_create_add = Button_ttk(master, text='+', command=self.add_mark, width=5)
+        self.button_create_add.place(x=130, y=102)
 
         self.button_create_final = Button_ttk(master, text='Додати', width=25, command=self.create)
-        self.button_create_final.place(x=10, y=130)
+        self.button_create_final.place(x=10, y=135)
 
-        self.label_create_0 = Label(master, text='Оцінки:')
+        self.label_create_0 = Label(master, text='Оцінки:', font=self.fon_normal)
+        self.label_info_1 = Label(master, text='Помилка!', foreground='gray30', font=self.fon_normal)
 
         # Функционал для удаления значения (labels, entries, buttons)
-        self.label_caption_delete = Label(master, text='Видалення студента з бази даних')
-        self.label_caption_delete.place(x=10, y=170)
+        self.label_caption_delete = Label(master, text='Видалення студента з бази даних', font=self.fon_title)
+        self.label_caption_delete.place(x=10, y=190)
 
-        self.label_delete = Label(master, text='id')
-        self.label_delete.place(x=10, y=200)
+        self.label_delete = Label(master, text='id', font=self.fon_normal)
+        self.label_delete.place(x=10, y=225)
 
         self.entry_delete = Entry(master, width=3)
-        self.entry_delete.place(x=70, y=200)
+        self.entry_delete.place(x=70, y=225)
 
         self.button_delete = Button_ttk(master, text='Видалити', width=25, command=self.delete)
-        self.button_delete.place(x=10, y=230)
+        self.button_delete.place(x=10, y=255)
+
+        self.label_info_2 = Label(master, text='Помилка!', foreground='gray30', font=self.fon_normal)
 
     def add_mark(self):
         self.counter += 1
         self.marks.append(self.entry_create_3.get())
-        print(self.marks)
+        # print(self.marks)
         self.label_create_3.destroy()
         self.entry_create_3.destroy()
         try:
-            self.label_create_3 = Label(self.master, text=self.headings[self.counter])
+            self.label_create_3 = Label(self.master, text=self.headings[self.counter], font=self.fon_normal)
         except IndexError:
             self.label_create_3.destroy()
             self.entry_create_3.destroy()
             self.button_create_add.destroy()
-            self.label_create_0.place(x=10, y=100)
-            self.label_create_3 = Label(self.master, text=self.marks)
-            self.label_create_3.place(x=65, y=100)
+            self.label_create_0.place(x=10, y=105)
+            self.label_create_3 = Label(self.master, text=self.marks, font=self.fon_normal)
+            self.label_create_3.place(x=65, y=105)
         else:
-            self.label_create_3.place(x=10, y=100)
+            self.label_create_3.place(x=10, y=105)
             self.entry_create_3 = Entry(self.master, width=3)
-            self.entry_create_3.place(x=70, y=100)
+            self.entry_create_3.place(x=70, y=105)
 
     def delete(self):
         # print('deleting')
-        student_id = self.entry_delete.get()  # получаем id, которое ввел пользователь
-        sql_delete(self.curs, self.spec, self.group, student_id)  # вызываем функцию, которая удаляет студента по id
+        try:
+            student_id = self.entry_delete.get()  # получаем id, которое ввел пользователь
+            sql_delete(self.curs, self.spec, self.group, student_id)  # вызываем функцию, которая удаляет студента
+        except sqlite3.OperationalError:
+            self.label_info_2.place(x=200, y=255)
+        else:
+            self.label_info_2.destroy()
 
     def create(self):
-        name = self.entry_create_1.get()
-        number = self.entry_create_2.get()
-        info = self.marks  # строка. пример: '90 95 65 70 87 100..'
+        try:
+            name = self.entry_create_1.get()
+            number = self.entry_create_2.get()
+            info = self.marks  # строка. пример: '90 95 65 70 87 100..'
 
-        info.insert(0, name)  # в начало списка вставляем ФИО студента
-        info.insert(0, number)  # также в начало вставляем номер студента
-        print(info)  # переменная info выглядит след. образом: [id, 'Full Name', 90, 65, 70 ...]
+            info.insert(0, name)  # в начало списка вставляем ФИО студента
+            info.insert(0, number)  # также в начало вставляем номер студента
+            # print(info)  # переменная info выглядит след. образом: [id, 'Full Name', 90, 65, 70 ...]
 
-        sql_insert(self.curs, self.spec, self.group, info)
+            sql_insert(self.curs, self.spec, self.group, info)
+        except sqlite3.ProgrammingError:
+            self.label_info_1.place(x=200, y=135)
+        else:
+            self.label_info_1.destroy()
 
 
 class View4:
@@ -363,13 +379,12 @@ class View4:
     def diagram(self):
         """ Построение гистрограммы """
         self.headings = sorted(self.headings)  # для коректного отображения чисел на гистограмме
-        print(self.headings, '\n', self.average)
+        # print(self.headings, '\n', self.average)
         num = arange(1, len(self.headings) + 1)  # список значений оси х
-
+        average_group_mark = round(sum(self.average)/len(self.average), 2)  # Средний балл по группе по всем предметам
         figure = Figure()
-        figure.suptitle('Успішніть студентів групи {}\nСередній бал: {}'.
-                        format(self.group, sum(self.average)/len(self.average)))  # название графика (сверху)
-
+        # название графика (сверху)
+        figure.suptitle('Успішніть студентів групи {}\nСередній бал: {}'. format(self.group, average_group_mark))
         ax = figure.add_subplot(111)  # создаем полотно
         ax.bar(self.headings, self.average)  # гистограмма с значениями х и у
         figure.autofmt_xdate(bottom=0.2, rotation=50)  # формат подписей снизу
